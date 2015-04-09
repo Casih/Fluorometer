@@ -78,6 +78,10 @@ void rojo()
   lcd.clear();
   digitalWrite(A2, LOW);
   digitalWrite(A3, LOW);
+  digitalWrite(8,HIGH);
+  digitalWrite(9,LOW);
+  digitalWrite(10,LOW);
+  digitalWrite(11,LOW);
   lcd.setCursor(0,0);
   lcd.print("Rojo:");
   mostrar();
@@ -88,6 +92,10 @@ void verde()
   lcd.clear();
   digitalWrite(A2, HIGH);
   digitalWrite(A3, HIGH);
+  digitalWrite(9,HIGH);
+  digitalWrite(10,LOW);
+  digitalWrite(11,LOW);
+  digitalWrite(8,LOW);
   lcd.setCursor(0,0);
   lcd.print("Verde:");
   mostrar();
@@ -98,6 +106,10 @@ void azul()
   lcd.clear();
   digitalWrite(A2, LOW);
   digitalWrite(A3, HIGH);
+  digitalWrite(10,HIGH);
+  digitalWrite(11,LOW);
+  digitalWrite(8,LOW);
+  digitalWrite(9,LOW);
   lcd.setCursor(0,0);
   lcd.print("Cyan:");
   mostrar();
@@ -108,6 +120,10 @@ void OD()
   lcd.clear();
   digitalWrite(A2, HIGH);
   digitalWrite(A3, LOW);
+  digitalWrite(11,HIGH);
+  digitalWrite(8,LOW);
+  digitalWrite(9,LOW);
+  digitalWrite(10,LOW);
   lcd.setCursor(0,0);
   lcd.print("Densidad Optica");
   mostrar();
@@ -115,6 +131,10 @@ void OD()
 }
 void def()
 {
+  digitalWrite(8,LOW);
+  digitalWrite(9,LOW);
+  digitalWrite(10,LOW);
+  digitalWrite(11,LOW);
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Seleccione:");
