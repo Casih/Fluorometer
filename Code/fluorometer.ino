@@ -1,3 +1,17 @@
+/*
+  Fluorometer
+
+ The circuit:
+ https://github.com/Casih/Fluorometer/tree/master/Circuit
+
+ created 2015
+ by Carlos A. Sanchez & Ciro Gelvez
+
+ https://github.com/Casih/Fluorometer/tree/master/Code
+ 
+ */
+
+
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 #include <FreqCount.h>
