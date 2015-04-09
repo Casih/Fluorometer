@@ -1,2 +1,3 @@
-# Fluorometer
-This repository contains evrything needed for the construction of a fluorometer from a TCS230 color sensor
+# Flourometer
+
+This repository contains everything related to the construction of a fluorometer, using a TCS230 color sensor.
