@@ -62,6 +62,7 @@ void setup() {
 void mostrarR()
 {
   if(FreqCount.available()){
+          delay(8000);
           count = FreqCount.read();
           lcd.clear();  
           lcd.setCursor(0,0);
@@ -82,11 +83,13 @@ void mostrarR()
           lcd.setCursor(0,1);
           lcd.print(count2 - count);
           Serial.println(count2 - count);
+          delay(8000);
         }
 }
 void mostrarV()
 {
   if(FreqCount.available()){
+          delay(8000);
           count = FreqCount.read();
           lcd.clear();  
           lcd.setCursor(0,0);
@@ -107,11 +110,13 @@ void mostrarV()
           lcd.setCursor(0,1);
           lcd.print(count2 - count);
           Serial.println(count2 - count);
+          delay(8000);
         }
 }
 void mostrarA()
 {
   if(FreqCount.available()){
+          delay(8000);
           count = FreqCount.read();
           lcd.clear();  
           lcd.setCursor(0,0);
@@ -132,6 +137,7 @@ void mostrarA()
           lcd.setCursor(0,1);
           lcd.print(count2 - count);
           Serial.println(count2 - count);
+          delay(8000);
         }
 }
 void mostrarod()
@@ -159,6 +165,7 @@ void mostrarod()
         lcd.setCursor(0,1);
         lcd.print(printvar);
         Serial.println(printvar);
+        delay(8000);
    }
 }
 void rojo()
@@ -176,6 +183,8 @@ void rojo()
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Inserte Blanco");
+  lcd.setCursor(0,1);
+  lcd.print("Tiene 8 segundos");
   mostrarR();
   //delay(4000);
 }
@@ -194,6 +203,8 @@ void verde()
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Inserte Blanco");
+  lcd.setCursor(0,1);
+  lcd.print("Tiene 8 segundos");
   mostrarV();
   //delay(4000);      
 }
@@ -212,6 +223,8 @@ void azul()
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Inserte Blanco");
+  lcd.setCursor(0,1);
+  lcd.print("Tiene 8 segundos");
   mostrarA();
   //delay(4000);
 }
