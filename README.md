@@ -22,5 +22,5 @@ Instructions
 
 1. Please do not plug it into the wall using a USB phone adapter since the voltage supplied might be to low and the fluorometer might stop working (In previous experiences we had to re upload the code to the arduino when we did this, so this probably erased the code in it).
 
-2. Please do not Panic and start pushing the button over and over again if a push doesn't instantly change the mode, It can take up to a second to do so.
+2. Please do not Panic and start pushing the button over and over again if a push doesn't instantly change the mode, It can take up to a minute to do so, since the cases in the code are cyclical and it has to go over the whole case before switching.
 
