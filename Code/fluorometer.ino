@@ -5,196 +5,504 @@
  https://github.com/Casih/Fluorometer/tree/master/Circuit
 
  created 2015
- by Carlos A. Sanchez & Ciro Gelvez
+ by Carlos A. Sanchez & Ciro Gelvez 
+ 
+ Modified 2017
+ by Johnny Turizo & Carlos A. Sanchez
 
- https://github.com/Casih/Fluorometer/tree/master/Code
  
  */
-
-
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 #include <FreqCount.h>
+#include <math.h>
 
 LiquidCrystal_I2C lcd(0x27,16,2);
-unsigned long count;
-const int buttonPin = 2;    // the number of the pushbutton pin
-const int ledPin = 13;      // the number of the LED pin
+signed long Blank;
+signed long Measurement;
+signed long Bl_OD;   //Blank OD
+signed long OD_Fin;
+int Modo = 0;
+int Color = 0;
+//Pin button definitions
+const int red = 2;     // the number of the pushbutton pin red mode
+const int green = 3;    // the number of the pushbutton pin green mode
+const int blue = 4;     // the number of the pushbutton pin blue mode
+const int OD = 6;       // the number of the pushbutton pin optical density mode
+const int Enter = 7;    // the number of the pushbutton pin Enter
+int ModoR = HIGH;
+int ModoV = HIGH;
+int ModoA = HIGH;
+int ModoOD = HIGH;
+int ModoEn = HIGH;
+//LED pin definition
+const int RL = 8;     // the number of the lED pin red mode
+const int GL= 9;    // the number of the LED pin green mode
+const int BL= 10;     // the number of the LED pin bluemode
+const int ODL = 11;       // the number of the LED pin optical density mode
+//***********************************************************************
 int i;
-int inByte;
-// Variables will change:
-int ledState = HIGH;         // the current state of the output pin
-int buttonState;             // the current reading from the input pin
-int lastButtonState = LOW;   // the previous reading from the input pin
-
-// the following variables are long's because the time, measured in miliseconds,
-// will quickly become a bigger number than can be stored in an int.
-long lastDebounceTime = 0;  // the last time the output pin was toggled
-long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 void setup() {
-  // initialize serial communication:
-  Serial.begin(9600);        //
-  
-  //initialize frequency counter:
-  FreqCount.begin(1000);     // 
-  
-  // initialize the LED pins:
-  pinMode(5, INPUT);         // LECTOR DE FRECUENCIA
+  Serial.begin(9600);        // initialize serial communication:
+  FreqCount.begin(1000);     //  //initialize frequency counter:
+  // initialize the LED pins Sensor:
+  pinMode(5, INPUT);         // Frequency reader
   pinMode(A0, OUTPUT);       // S0
   pinMode(A1, OUTPUT);       // S1
   pinMode(A2, OUTPUT);       // S2
   pinMode(A3, OUTPUT);       // S3
-  
-  // Sensor en apagado:
+  //********LED's colors********
+  pinMode(RL,OUTPUT);          //red
+  pinMode(GL,OUTPUT);          //green
+  pinMode(BL,OUTPUT);         //blue
+  pinMode(ODL,OUTPUT);         //od
+  digitalWrite(RL, LOW);    //
+  digitalWrite(GL, LOW);    //
+  digitalWrite(BL, LOW);    //
+  digitalWrite(ODL, LOW);    //
+  // Sensor off:
   digitalWrite(A0, HIGH);    //
   digitalWrite(A1, HIGH);    //
-  
-  // initialize lcd screen
-  
-  lcd.init();                //
+  //Button initialization
+  pinMode(red, INPUT);
+  pinMode(blue, INPUT);
+  pinMode(green, INPUT);
+  pinMode(OD, INPUT);
+  pinMode(Enter, INPUT);
+  int i = 0;
+  // LCD screen setup
+  lcd.init();                // 
   lcd.backlight();           //
   lcd.clear();               // 
   lcd.setCursor(0,0);        //
-  lcd.print("Seleccione:");  //
+  lcd.print("Select mode:");  //
   lcd.setCursor(0,1);        //
-  lcd.print("R, G, C, O");   //
-  
-  pinMode(buttonPin, INPUT);
-  pinMode(ledPin, OUTPUT);
-  int i = 0;
-}
-void mostrar()
-{
-  if(FreqCount.available()){
-          count = FreqCount.read();
-          lcd.setCursor(0,1);
-          lcd.print(count);
-          Serial.println(count);
-        }
-}
-void rojo()
-{
-  lcd.clear();
-  digitalWrite(A2, LOW);
-  digitalWrite(A3, LOW);
-  digitalWrite(8,HIGH);
-  digitalWrite(9,LOW);
-  digitalWrite(10,LOW);
-  digitalWrite(11,LOW);
-  lcd.setCursor(0,0);
-  lcd.print("Rojo:");
-  mostrar();
-  //delay(4000);
-}
-void verde()
-{
-  lcd.clear();
-  digitalWrite(A2, HIGH);
-  digitalWrite(A3, HIGH);
-  digitalWrite(9,HIGH);
-  digitalWrite(10,LOW);
-  digitalWrite(11,LOW);
-  digitalWrite(8,LOW);
-  lcd.setCursor(0,0);
-  lcd.print("Verde:");
-  mostrar();
-  //delay(4000);      
-}
-void azul()
-{
-  lcd.clear();
-  digitalWrite(A2, LOW);
-  digitalWrite(A3, HIGH);
-  digitalWrite(10,HIGH);
-  digitalWrite(11,LOW);
-  digitalWrite(8,LOW);
-  digitalWrite(9,LOW);
-  lcd.setCursor(0,0);
-  lcd.print("Cyan:");
-  mostrar();
-  //delay(4000);
-}
-void OD()
-{
-  lcd.clear();
-  digitalWrite(A2, HIGH);
-  digitalWrite(A3, LOW);
-  digitalWrite(11,HIGH);
-  digitalWrite(8,LOW);
-  digitalWrite(9,LOW);
-  digitalWrite(10,LOW);
-  lcd.setCursor(0,0);
-  lcd.print("Densidad Optica");
-  mostrar();
-  //delay(4000);
-}
-void def()
-{
-  digitalWrite(8,LOW);
-  digitalWrite(9,LOW);
-  digitalWrite(10,LOW);
-  digitalWrite(11,LOW);
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Seleccione:");
-  lcd.setCursor(0,1);
-  lcd.print("R, G, C, O");
-}
-void loop() 
-{
-  int reading = digitalRead(buttonPin);
-  if (reading != lastButtonState) {
-    lastDebounceTime = millis();
-  }
-  if ((millis() - lastDebounceTime) > debounceDelay) 
-  {
-    if (reading != buttonState) 
-    {
-      buttonState = reading;
-      i++;
-      Serial.println(i);
-    }
-    //if(i==1) inByte = 'G';
-    //if(i==2) inByte = 'R';
-    //if(i==3) inByte = 'C';
-    //if(i==4) inByte = 'O';
-    if(i==6)
-    {
-    i=0;
-    }    
-    switch (i) 
-    {
-      case 2:
-      {
-        rojo();
-        delay(1000);
-        break;
-      }  
-      case 3:
-      {
-        verde();
-        delay(1000);
-        break;
-      }
-      case 4: 
-      {
-        azul();
-        delay(1000);
-        break;
-      }
-      case 5:
-      {
-        OD();
-        delay(1000);
-        break;
-      }
-      default:
-      {
-        def();
-      }
-    }delay(1000);
-  }
-  lastButtonState = reading;
+  lcd.print("r, g ,c, OD");   //
+
+  Serial.println("Blank,Measurement,Mode"); 
 }
 
+void loop() {
+  ModoR = digitalRead(red);
+  ModoV = digitalRead(green);
+  ModoA = digitalRead(blue);
+  ModoOD = digitalRead(OD);
+  ModoEn = digitalRead(Enter);
+  if (ModoR == LOW) {
+    i=1;
+    }
+  if (ModoV == LOW) {
+    i=2;
+    }
+  if (ModoA == LOW) {
+    i=3;
+    }
+  if (ModoOD == LOW) {
+    i=4;
+    }
+  if (ModoEn == LOW){
+    i=5;
+  }
+// Cases
+ switch (i) {
+      case 1:
+        Modo=1;
+        rojo();
+        i=0;
+        break;
+      case 2:
+        Modo=1;
+        verde();
+        i=0;
+        break;
+      case 3:
+        Modo=1;
+        bluel();
+        i=0;
+        break;
+      case 4:
+        Modo=1;
+        ODD();
+        i=0;
+        break;
+      case 5:
+        if(Modo==2){
+          color();
+          i=0;
+        }
+        break;
+      default:
+        break;
+    }
+  delay(100);
+}
+
+void color(){
+  //Serial.println("color");
+  switch (Color) {
+    case 1:  
+      rojo2();
+      break;
+    case 2:  
+      verde2();
+      break;
+    case 3:  
+      blue2();
+      break;
+    case 4:  
+      OD2();
+      break;
+    default:
+    break;
+   }
+}
+
+void rojo(){
+  //Serial.println("red");
+  digitalWrite(RL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("rfp mode:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert Blank ");
+  lcd.write(7);
+  delay(100);
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("reading Blank.");
+  lcd.setCursor(0,1);
+  lcd.print("....");
+  lcd.blink();
+  GetBlank();
+  Getred();   
+  digitalWrite(RL, LOW);    //Turn Off red led
+  Color=1;
+  Modo=2;
+}
+
+void rojo2(){
+  // Serial.println("red2");
+  digitalWrite(RL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("rfp mode:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert sample");
+  lcd.write(7);
+  delay(1000);
+  Getred();
+  digitalWrite(RL, LOW);    //Turn Off red led
+  Color=1;
+  Modo=2;
+ }
+ 
+void verde(){
+  //Serial.println("green");
+  digitalWrite(GL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("gfp mode:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert Blank ");
+  lcd.write(7);
+  delay(100);
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("reading Blank.");
+  lcd.setCursor(0,1);
+  lcd.print("....");
+  lcd.blink();
+  GetBlank();
+  Getgreen();   
+  digitalWrite(GL, LOW);    //Turn Off red led
+  Color=2;
+  Modo=2;
+}
+
+void verde2(){
+  //Serial.println("green2");
+  digitalWrite(GL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("gfp mode:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert sample");
+  lcd.write(7);
+  delay(1000);
+  Getgreen();
+  digitalWrite(GL, LOW);    //Turn Off red led
+  Color=2;
+  Modo=2;
+ }
+ 
+void bluel(){
+  //Serial.println("blue");
+  digitalWrite(BL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("cfp mode:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert Blank ");
+  lcd.write(7);
+  delay(100);
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("reading Blank.");
+  lcd.setCursor(0,1);
+  lcd.print("....");
+  lcd.blink();
+  GetBlank();
+  Getblue();   
+  digitalWrite(BL, LOW);    //Turn Off red led
+  Color=3;
+  Modo=2;
+}
+
+void blue2(){
+  //Serial.println("blue2");
+  digitalWrite(BL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("cfp mode:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert sample");
+  lcd.write(7);
+  delay(1000);
+  Getblue();
+  digitalWrite(BL, LOW);    //Turn Off red led
+  Color=3;
+  Modo=2;
+ }
+
+void ODD(){
+  //Serial.println("OD");
+  digitalWrite(ODL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Modo OD:");
+  lcd.setCursor(0,1);
+  lcd.print("Enter Blank ");
+  lcd.write(7);
+  delay(100);
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Substracting blank.");
+  lcd.setCursor(0,1);
+  lcd.print("....");
+  lcd.blink();
+  GetBlankOD();
+  GetOD();   
+  digitalWrite(ODL, LOW);    //Turn Off red led
+  Color=4;
+  Modo=2;
+}
+
+void OD2(){
+  //Serial.println("OD2");
+  digitalWrite(ODL, HIGH);    //Turn On red led
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Modo OD:");
+  lcd.setCursor(0,1);
+  lcd.print("Insert sample");
+  lcd.write(7);
+  delay(1000);
+  GetOD();
+  digitalWrite(ODL, LOW);    //Turn Off red led
+  Color=4;
+  Modo=2;
+ }
+
+void GetBlankOD(){
+   //Serial.println("GetBlank");
+ if(FreqCount.available()){
+  delay(1000);
+  Bl_OD = FreqCount.read();
+  lcd.noBlink();
+  lcd.clear();
+  lcd.setCursor(0,1);
+  lcd.print("Insert Blank");
+  lcd.write(7);  //Enter
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  GetBlank();
+//  Serial.print("Blank = ");
+//  Serial.println(Blank);
+  } 
+} 
+
+void GetBlank(){
+   //Serial.println("GetBlank");
+ if(FreqCount.available()){
+  delay(1000);
+  Blank = FreqCount.read();
+  lcd.noBlink();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Bl = ");
+  lcd.print(Blank);
+  lcd.setCursor(0,1);
+  lcd.print("Insert sample");
+  lcd.write(7);  //Enter
+  lcd.setCursor(0,1);
+//  Serial.print("Blank = ");
+//  Serial.println(Blank);
+  } 
+}
+
+void Getred(){
+   //Serial.println("Getred");
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  if(FreqCount.available()){
+          lcd.clear();  
+          lcd.setCursor(0,0);       
+          lcd.print("reading red..");
+          lcd.setCursor(0,1);
+          lcd.print("....");
+          lcd.blink();
+          delay(1000);
+          Measurement = FreqCount.read();
+          lcd.noBlink();
+          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print("Med = ");
+          lcd.print(Measurement); 
+          lcd.setCursor(0,1);
+          lcd.print("Red =");
+          lcd.print(Measurement - Blank);
+          Serial.print(Blank);
+          Serial.print(",");
+          Serial.print(Measurement - Blank);
+          Serial.println(",red");     
+          delay(500);
+        }
+}
+
+void Getgreen(){
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  if(FreqCount.available()){
+          lcd.clear();  
+          lcd.setCursor(0,0);       
+          lcd.print("reading green..");
+          lcd.setCursor(0,1);
+          lcd.print("....");
+          lcd.blink();
+          delay(1000);
+          Measurement = FreqCount.read();
+          lcd.noBlink();
+          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print("Med = ");
+          lcd.print(Measurement);
+          lcd.setCursor(0,1);
+          lcd.print("green =");
+          lcd.print(Measurement - Blank);
+          Serial.print(Blank);
+          Serial.print(",");
+          Serial.print(Measurement - Blank);
+          Serial.println(",green");    
+          delay(500);
+        }
+}
+
+void Getblue(){
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  if(FreqCount.available()){
+          lcd.clear();  
+          lcd.setCursor(0,0);       
+          lcd.print("reading blue..");
+          lcd.setCursor(0,1);
+          lcd.print("....");
+          lcd.blink();
+          delay(1000);
+          Measurement = FreqCount.read();
+          lcd.noBlink();
+          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print("Med = ");
+          lcd.print(Measurement);
+          lcd.setCursor(0,1);
+          lcd.print("blue =");
+          lcd.print(Measurement - Blank);
+          Serial.print(Blank);
+          Serial.print(",");
+          Serial.print(Measurement - Blank);
+          Serial.println(",blue");    
+          delay(500);
+        }
+}
+
+void GetOD(){
+  ModoEn = digitalRead(Enter);
+  while (ModoEn == HIGH){     
+    ModoEn = digitalRead(Enter);        //waiting for enter
+    }
+  if(FreqCount.available()){
+          lcd.clear();  
+          lcd.setCursor(0,0);       
+          lcd.print("reading OD..");
+          lcd.setCursor(0,1);
+          lcd.print("....");
+          lcd.blink();
+          delay(1000);
+          Measurement = FreqCount.read();
+          lcd.noBlink();
+          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print("Med = ");
+          lcd.print(Measurement);
+          lcd.setCursor(0,1);
+          lcd.print("OD =");
+          OD_Fin=- log10(Measurement/Bl_OD)-(-log10(Blank/Bl_OD));
+          lcd.print(OD_Fin);
+          Serial.print(Blank);
+          Serial.print(",");
+          Serial.print(OD_Fin);
+          Serial.println(",OD");    
+          delay(500);
+        }
+}
