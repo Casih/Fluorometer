@@ -10,7 +10,7 @@ This repository contains everything related to the construction of a fluorometer
   
 2. Push the button to select which mode you wish to operate in
 
-3. Follow onscreen instructions.As simple as that.
+3. Follow onscreen instructions.
 
 *****REMEMBER*****
 
